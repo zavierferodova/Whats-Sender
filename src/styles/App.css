@@ -1,0 +1,22 @@
+.appbarLogo-hga42 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.appbarLogo-hga42 img {
+    width: 2rem;
+    height: 2rem;
+}
+
+.appbarLogo-hga42 span {
+    margin-left: 0.8rem;
+}
+
+.heading-ja8ah {
+    color: rgb(64, 66, 68);
+}
+
+.subText-haksy92 {
+    color: rgb(92, 95, 99);
+}
