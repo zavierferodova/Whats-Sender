@@ -93,14 +93,26 @@ function App () {
    * Get WhatsApp Uri to send some message with platform detection
    * @returns
    */
-  const getWhatsAppUri = () => {
+  const getWhatsAppSendUri = (detectDevice = false) => {
     const md = new MobileDetect(navigator.userAgent)
     let whatsAppUri = ''
 
-    if (md.mobile()) {
-      whatsAppUri = `https://api.whatsapp.com/send?phone=${phoneCode}${phoneNumber}&text=${encodeURI(textMessage)}`
+    if (detectDevice) {
+      if (md.mobile()) {
+        whatsAppUri = `https://api.whatsapp.com/send?phone=${phoneCode}${phoneNumber}`
+      } else {
+        whatsAppUri = `https://web.whatsapp.com/send?phone=${phoneCode}${phoneNumber}`
+      }
+
+      if (textMessage) {
+        whatsAppUri += `&text=${encodeURIComponent(textMessage)}`
+      }
     } else {
-      whatsAppUri = `https://web.whatsapp.com/send?phone=${phoneCode}${phoneNumber}&text=${encodeURI(textMessage)}`
+      whatsAppUri = `https://wa.me/${phoneCode}${phoneNumber}`
+
+      if (textMessage) {
+        whatsAppUri += `?text=${encodeURIComponent(textMessage)}`
+      }
     }
 
     return whatsAppUri
@@ -113,7 +125,7 @@ function App () {
     try {
       validationButtonRef?.current?.click()
       if (validateForm()) {
-        const whatsAppUri = `https://api.whatsapp.com/send?phone=${phoneCode}${phoneNumber}&text=${encodeURI(textMessage)}`
+        const whatsAppUri = getWhatsAppSendUri()
         await navigator.clipboard.writeText(whatsAppUri)
         SnackbarHandler.open('Sharing link copied to clipboard !')
       }
@@ -128,7 +140,7 @@ function App () {
   const handleSendUriMessage = () => {
     validationButtonRef?.current?.click()
     if (validateForm()) {
-      const whatsAppUri = getWhatsAppUri()
+      const whatsAppUri = getWhatsAppSendUri(true)
       window.open(whatsAppUri, '_blank')
     }
   }

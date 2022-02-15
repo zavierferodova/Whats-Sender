@@ -12,6 +12,7 @@ ReactDOM.render(
   document.getElementById('root')
 )
 
+// Register service worker
 serviceWorkerRegistration.register()
 
 // If you want to start measuring performance in your app, pass a function
