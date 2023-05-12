@@ -1,3 +1,4 @@
+import SelectSearch from './searchable'
 import MuiSelect, { SelectProps } from '@mui/material/Select'
 import { FormControl, InputLabel } from '@mui/material'
 import { makeStyles } from '@mui/styles'
@@ -53,3 +54,4 @@ function Select (props: SelectProps) {
 }
 
 export default Select
+export { SelectSearch }

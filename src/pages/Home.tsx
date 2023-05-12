@@ -1,8 +1,6 @@
 import { ChangeEvent, useRef, useState } from 'react'
 import AppBar from 'components/appbar'
-import { SelectChangeEvent } from '@mui/material/Select'
-import Select from 'components/core/select'
-import MenuItem from '@mui/material/MenuItem'
+import SelectSearch, { SelectSearchItemValue } from 'components/core/select/searchable'
 import TextField from 'components/core/text-field'
 import InputAdorment from '@mui/material/InputAdornment'
 import TextAreaField from 'components/core/text-area-field'
@@ -13,7 +11,7 @@ import SendIcon from '@mui/icons-material/Send'
 import countryPhones from 'data/country-phones'
 import colors from 'theme/colors'
 import MobileDetect from 'mobile-detect'
-import { handleInputChange } from 'utils/component-handler'
+import { handleInputChange, handleValueChange } from 'utils/component-handler'
 import 'styles/App.css'
 
 const shareButtonStyle = {
@@ -28,27 +26,60 @@ const fabStyle = {
   color: 'white',
   '&:hover': {
     backgroundColor: colors.light.buttonPrimaryHover
+  },
+  '.MuiSvgIcon-root': {
+    transform: 'translate(10%)'
   }
 }
 
 function App () {
   const countryData = countryPhones
-  const [phoneCode, setPhoneCode] = useState('62')
+  const defaultCountry = countryData.find((country) => country.name === 'Indonesia')
+  const defaultSelectValue = {
+    label: `${defaultCountry?.emoji} (+${defaultCountry?.phone}) ${defaultCountry?.name}`,
+    value: `${defaultCountry?.phone};${defaultCountry?.name}`
+  }
+  const [selectValue, setSelectValue] = useState<SelectSearchItemValue>(defaultSelectValue)
+  const [phoneCode, setPhoneCode] = useState(defaultSelectValue.value.split(';')[0])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [textMessage, setTextMessage] = useState('')
   const [openSnackbar, setOpenSnackbar] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const validationButtonRef: any = useRef(null)
 
+  const searchCountry = (inputValue: string) => {
+    return countryData.filter((country) => {
+      const label = `(+${country.phone}) ${country.name}`.toLocaleLowerCase()
+      const inputValueLowerCase = inputValue.toLowerCase()
+      return label.includes(inputValueLowerCase)
+    })
+  }
+
   const FormHandler = {
     /**
-     * Set Select phone code value when changed
-     * @param event
+     * Handle SelectSearch load value for searching
+     * @param inputValue
+     * @param callback
      */
-    handlePhoneCodeChange: (event: SelectChangeEvent<unknown>) => {
-      setPhoneCode(event.target.value as string)
+    loadSelectValue: (
+      inputValue: string,
+      callback: (value: SelectSearchItemValue[]) => void
+    ) => {
+      const countries = searchCountry(inputValue)
+      const selectOptions = countries.map((country) => ({
+        label: `${country.emoji} (+${country.phone}) ${country.name}`,
+        value: `${country.phone};${country.name}`
+      }))
+      callback(selectOptions)
     },
-
+    /**
+     * Handle SearchSelect change value event
+     * @param country
+     */
+    handleSelectChange: (country: any) => {
+      handleValueChange(country, setSelectValue)
+      setPhoneCode(country.value.split(';')[0])
+    },
     /**
      * Set TextField phone number value when changed
      * @param event
@@ -160,17 +191,13 @@ function App () {
               <div className="text-2xl mb-1 heading-ja8ah">Start your conversation !</div>
               <div className="mb-6 text-sm subText-haksy92">Now you can send message without save the number.</div>
               <div className="mb-3">
-                <Select required value={phoneCode} onChange={FormHandler.handlePhoneCodeChange}>
-                  {
-                    countryData.map((country: any, index: number) => {
-                      return (
-                        <MenuItem key={index} value={country.phone}>
-                          {country.emoji} (+{country.phone}) {country.name}
-                        </MenuItem>
-                      )
-                    })
-                  }
-                </Select>
+                <SelectSearch
+                  cacheOptions
+                  defaultOptions
+                  value={selectValue}
+                  loadOptions={FormHandler.loadSelectValue}
+                  onChange={FormHandler.handleSelectChange}
+                  />
               </div>
               <div className="mb-3">
                 <TextField
