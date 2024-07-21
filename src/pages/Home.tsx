@@ -85,11 +85,17 @@ function App () {
      * @param event
      */
     handlePhoneNumberChange: (event: ChangeEvent<HTMLInputElement>) => {
-      const numberOnlyPattern = /^[0-9]*$/
-      const inputValue = event.target.value
-      if (numberOnlyPattern.test(inputValue)) {
-        setPhoneNumber(inputValue.toString())
+      const inputValue = event.target.value.replace(/[^0-9]/g, '')
+
+      let formattedValue = ''
+      for (let i = 0; i < inputValue.length; i++) {
+        if (i === 2 || (i > 2 && (i - 2) % 4 === 0)) {
+          formattedValue += '-'
+        }
+        formattedValue += inputValue[i]
       }
+
+      setPhoneNumber(formattedValue)
     }
   }
 
@@ -127,19 +133,20 @@ function App () {
   const getWhatsAppSendUri = (detectDevice = false) => {
     const md = new MobileDetect(navigator.userAgent)
     let whatsAppUri = ''
+    const textPhoneNumber = phoneNumber.replace(/-/g, '')
 
     if (detectDevice) {
       if (md.mobile()) {
-        whatsAppUri = `https://api.whatsapp.com/send?phone=${phoneCode}${phoneNumber}`
+        whatsAppUri = `https://api.whatsapp.com/send?phone=${phoneCode}${textPhoneNumber}`
       } else {
-        whatsAppUri = `https://web.whatsapp.com/send?phone=${phoneCode}${phoneNumber}`
+        whatsAppUri = `https://web.whatsapp.com/send?phone=${phoneCode}${textPhoneNumber}`
       }
 
       if (textMessage) {
         whatsAppUri += `&text=${encodeURIComponent(textMessage)}`
       }
     } else {
-      whatsAppUri = `https://wa.me/${phoneCode}${phoneNumber}`
+      whatsAppUri = `https://wa.me/${phoneCode}${textPhoneNumber}`
 
       if (textMessage) {
         whatsAppUri += `?text=${encodeURIComponent(textMessage)}`
@@ -203,6 +210,9 @@ function App () {
                 <TextField
                   required
                   value={phoneNumber}
+                  inputProps={{
+                    inputMode: 'tel'
+                  }}
                   onChange={FormHandler.handlePhoneNumberChange}
                   placeholder="Phone number"
                   InputProps={{
@@ -226,7 +236,7 @@ function App () {
               </div>
               <div className="text-center">
                 <Button sx={shareButtonStyle} onClick={handleCopyUriMessage}>
-                  Copy sharing link
+                  Copy link to share
                 </Button>
               </div>
             </form>

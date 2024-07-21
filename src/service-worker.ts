@@ -17,11 +17,11 @@ self.addEventListener('install', event => {
   self.skipWaiting()
 })
 
-// const appVer = '1.0'
+const appVer = '1.1'
 
 setCacheNameDetails({
   prefix: 'whats-sender',
-  // suffix: appVer,
+  suffix: appVer,
   precache: 'precache',
   runtime: 'runtime'
 })
