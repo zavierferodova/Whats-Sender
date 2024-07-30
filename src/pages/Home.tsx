@@ -13,6 +13,7 @@ import colors from 'theme/colors'
 import MobileDetect from 'mobile-detect'
 import { handleInputChange, handleValueChange } from 'utils/component-handler'
 import 'styles/App.css'
+import { AsYouType } from 'libphonenumber-js'
 
 const shareButtonStyle = {
   color: colors.light.buttonPrimary,
@@ -40,6 +41,7 @@ function App () {
     value: `${defaultCountry?.phone};${defaultCountry?.name}`
   }
   const [selectValue, setSelectValue] = useState<SelectSearchItemValue>(defaultSelectValue)
+  const countryCode = countryData.find((country) => country.name === defaultSelectValue.value.split(';')[1]).code
   const [phoneCode, setPhoneCode] = useState(defaultSelectValue.value.split(';')[0])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [textMessage, setTextMessage] = useState('')
@@ -86,13 +88,13 @@ function App () {
      */
     handlePhoneNumberChange: (event: ChangeEvent<HTMLInputElement>) => {
       const inputValue = event.target.value.replace(/[^0-9]/g, '')
-
       let formattedValue = ''
-      for (let i = 0; i < inputValue.length; i++) {
-        if (i === 2 || (i > 2 && (i - 2) % 4 === 0)) {
-          formattedValue += '-'
-        }
-        formattedValue += inputValue[i]
+
+      if (inputValue) {
+        formattedValue = new AsYouType(countryCode)
+          .input(`+${phoneCode}${inputValue}`)
+          .replace(`+${phoneCode} `, '')
+          .replaceAll(' ', '-')
       }
 
       setPhoneNumber(formattedValue)
